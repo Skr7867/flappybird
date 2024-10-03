@@ -1,11 +1,12 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'dart:async'; // Import for Timer
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_number/mobile_number.dart';
-import 'package:permission_handler/permission_handler.dart'; // Add this import
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../game/assets.dart';
@@ -27,14 +28,15 @@ class GameOverScreen extends StatefulWidget {
 
 class _GameOverScreenState extends State<GameOverScreen> {
   String mobileNumber = ''; // Variable to store the fetched mobile number
-
   List<SimCard> simCards = []; // List to store SIM card information
-
   bool isLoading = true;
-
+  bool isRestartButtonEnabled = false; // Track if Restart button is enabled
+  bool isLeaderboardButtonEnabled =
+      false; // Track if Leaderboard button is enabled
   final InterstitialAdManager adManager = InterstitialAdManager();
-
   int highestScore = 0;
+  int countdown = 5; // 5-second countdown
+  late Timer countdownTimer;
 
   @override
   void initState() {
@@ -43,6 +45,38 @@ class _GameOverScreenState extends State<GameOverScreen> {
     adManager
         .loadInterstitialAd(); // Load the interstitial ad when the screen is loaded
     _loadHighestScore(); // Load the highest score from SharedPreferences
+    _startButtonTimers(); // Start timers for buttons
+    _startCountdown(); // Start the countdown
+  }
+
+  // Start a timer that will enable the Restart and Leaderboard buttons after 5 seconds
+  void _startButtonTimers() {
+    setState(() {
+      isRestartButtonEnabled = false; // Disable the Restart button initially
+      isLeaderboardButtonEnabled =
+          false; // Disable the Leaderboard button initially
+    });
+    Timer(const Duration(seconds: 5), () {
+      setState(() {
+        isRestartButtonEnabled =
+            true; // Enable the Restart button after 5 seconds
+        isLeaderboardButtonEnabled =
+            true; // Enable the Leaderboard button after 5 seconds
+      });
+    });
+  }
+
+  // Start a countdown for 5 seconds to show the remaining time
+  void _startCountdown() {
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (countdown > 0) {
+          countdown--;
+        } else {
+          countdownTimer.cancel(); // Stop the countdown when it reaches 0
+        }
+      });
+    });
   }
 
   // Request phone permission and fetch mobile number and SIM card info
@@ -62,7 +96,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
 
         if (mobileNumber.isNotEmpty) {
           log('Mobile number fetched: $mobileNumber');
-          if (highestScore >= 500 && mobileNumber.isNotEmpty) {
+          if (highestScore >= 10000 && mobileNumber.isNotEmpty) {
             _sendScoreToServer(highestScore, mobileNumber);
           }
         } else {
@@ -118,10 +152,6 @@ class _GameOverScreenState extends State<GameOverScreen> {
     setState(() {
       // Update the UI with the new highest score
     });
-
-    // if (highestScore >= 24 && mobileNumber.isNotEmpty) {
-    //   _sendScoreToServer(highestScore, mobileNumber);
-    // }
   }
 
   // Function to sanitize the mobile number, removing any prefix like +91 or 91
@@ -165,8 +195,9 @@ class _GameOverScreenState extends State<GameOverScreen> {
 
   @override
   void dispose() {
-    adManager
-        .dispose(); // Dispose of the ad manager when this screen is disposed
+    countdownTimer
+        .cancel(); // Cancel the countdown timer when the widget is disposed
+    adManager.dispose();
     super.dispose();
   }
 
@@ -197,35 +228,52 @@ class _GameOverScreenState extends State<GameOverScreen> {
             const SizedBox(height: 20),
             Image.asset(Assets.gameOver),
             const SizedBox(height: 20),
+            if (!isRestartButtonEnabled || !isLeaderboardButtonEnabled)
+              Text(
+                'Please wait: $countdown seconds',
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.red,
+                  fontFamily: 'Game',
+                ),
+              ),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                if (adManager.isInterstitialAdReady) {
-                  adManager.showInterstitialAd(
-                    onAdClosed: () {
-                      onRestart();
-                    },
-                  );
-                } else {
-                  onRestart();
-                }
-              },
+              onPressed: isRestartButtonEnabled
+                  ? () {
+                      if (adManager.isInterstitialAdReady) {
+                        adManager.showInterstitialAd(
+                          onAdClosed: () {
+                            onRestart();
+                          },
+                        );
+                      } else {
+                        onRestart();
+                      }
+                    }
+                  : null, // Disable button if not enabled
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
               child: const Text('Restart', style: TextStyle(fontSize: 20)),
             ),
+            const SizedBox(
+              height: 10,
+            ),
             ElevatedButton(
-              onPressed: () {
-                if (adManager.isInterstitialAdReady) {
-                  adManager.showInterstitialAd(
-                    onAdClosed: () {
-                      widget.game.overlays.remove('gameOver');
-                      widget.game.overlays.add('profilePage');
-                    },
-                  );
-                } else {
-                  widget.game.overlays.remove('gameOver');
-                  widget.game.overlays.add('profilePage');
-                }
-              },
+              onPressed: isLeaderboardButtonEnabled
+                  ? () {
+                      if (adManager.isInterstitialAdReady) {
+                        adManager.showInterstitialAd(
+                          onAdClosed: () {
+                            widget.game.overlays.remove('gameOver');
+                            widget.game.overlays.add('profilePage');
+                          },
+                        );
+                      } else {
+                        widget.game.overlays.remove('gameOver');
+                        widget.game.overlays.add('profilePage');
+                      }
+                    }
+                  : null, // Disable button if not enabled
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
               child: const Text('Leaderboard', style: TextStyle(fontSize: 20)),
             ),
