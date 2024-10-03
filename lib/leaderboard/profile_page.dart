@@ -57,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: MediaQuery.of(context).size.height / 1.9,
+              height: MediaQuery.of(context).size.height / 2.1,
               width: MediaQuery.of(context).size.width,
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -136,13 +136,22 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           Positioned(
             left: 120,
-            top: 680,
+            top: 320,
             child: CustomButton(
               text: 'Play',
+              textStyle: const TextStyle(
+                  fontFamily: 'Game', color: Colors.white, fontSize: 25),
               onPressed: () {
-                widget.adManager.showInterstitialAd(onAdClosed: () {
-                  widget.game.overlays.add('gameOver');
-                });
+                // Ensure the current game score is reset before starting a new game session
+                widget.game.bird.scr = 0;
+
+                widget.adManager.showInterstitialAd(
+                  onAdClosed: () {
+                    widget.game.overlays.add('gameOver');
+                  },
+                );
+
+                // Transition back to the game screen
                 widget.game.overlays.remove('profilePage');
                 widget.game.overlays.add('gameOver');
               },
@@ -150,49 +159,49 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const Positioned(
             top: 50,
-            left: 110,
+            left: 130,
             child: Text(
               "Leaderboard",
               style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Game'),
             ),
           ),
           // Rank 1st
           Positioned(
-            top: 140,
-            right: 130,
+            top: 110,
+            right: 160,
             child: rank(
               radius: 30.0,
               height: 10,
               image: "assets/images/g.jpeg",
-              name: "Saddam Sir",
-              point: "23131",
+              name: "User 2",
+              point: "2nd",
             ),
           ),
           // Rank 2nd
           Positioned(
-            top: 140,
+            top: 110,
             left: 20,
             child: rank(
               radius: 30.0,
               height: 10,
               image: "assets/images/k.jpeg",
-              name: "Amit Sir",
-              point: "12323",
+              name: "User 2",
+              point: "1st",
             ),
           ),
           // Rank 3rd
           Positioned(
-            top: 140,
+            top: 110,
             right: 20,
             child: rank(
               radius: 30.0,
               height: 10,
               image: "assets/images/j.jpeg",
-              name: "Rahul Sir",
-              point: "6343",
+              name: "User 3",
+              point: "3rd",
             ),
           ),
         ],
