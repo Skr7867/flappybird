@@ -96,7 +96,7 @@ class _GameOverScreenState extends State<GameOverScreen> {
 
         if (mobileNumber.isNotEmpty) {
           log('Mobile number fetched: $mobileNumber');
-          if (highestScore >= 10000 && mobileNumber.isNotEmpty) {
+          if (highestScore >= 400 && mobileNumber.isNotEmpty) {
             _sendScoreToServer(highestScore, mobileNumber);
           }
         } else {
@@ -117,8 +117,6 @@ class _GameOverScreenState extends State<GameOverScreen> {
       if (status.isPermanentlyDenied) {
         openAppSettings();
       }
-
-      log('Phone permission not granted');
     }
 
     // Ensure the widget is mounted before calling setState
@@ -186,10 +184,10 @@ class _GameOverScreenState extends State<GameOverScreen> {
       if (response.statusCode == 200) {
         log('Score and mobile number sent successfully: Score = $highestScore, Mobile = $sanitizedMobile');
       } else {
-        log('Failed to send score and mobile number. Server responded with status code: ${response.statusCode}');
+        log('Failed to send score and mobile number: ${response.statusCode}');
       }
     } catch (error) {
-      log('Error sending score and mobile number: $error');
+      log('$error');
     }
   }
 

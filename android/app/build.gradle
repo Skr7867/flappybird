@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.flappybirds"
+    namespace = "com.makaz.flappybirds"
     compileSdkVersion 34 // You can adjust this based on your Flutter setup
     ndkVersion = flutter.ndkVersion
 
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.flappybirds"
+        applicationId = "com.makaz.flappybirds"
         minSdkVersion 23 // Ensure that minSdkVersion is set here
         targetSdkVersion 33 // You can update this as needed
         versionCode 1
@@ -32,9 +32,9 @@ android {
             // Configure the signing options here if needed for release builds
             signingConfig = signingConfigs.debug
             // Uncomment if needed
-            // shrinkResources true
-            // minifyEnabled true
-            // proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

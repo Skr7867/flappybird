@@ -38,7 +38,7 @@ class _GameWithAdsState extends State<GameWithAds> {
           });
         },
         onAdFailedToLoad: (Ad ad, LoadAdError error) {
-          print('Banner Ad failed to load: $error');
+          ('$error');
         },
       ),
     );

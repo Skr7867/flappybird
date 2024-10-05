@@ -4,6 +4,7 @@
 // import 'package:flappybirds/components/ground.dart';
 // import 'package:flappybirds/components/pipe_group.dart';
 // import 'package:flutter/material.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart'; // Import for Google Ads
 
 // import '../components/background.dart';
 // import '../components/bird.dart';
@@ -11,10 +12,16 @@
 
 // class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
 //   FlappyBirdGame();
+
 //   late Bird bird;
 //   late TextComponent score;
 //   Timer interval = Timer(Config.pipeInterval, repeat: true);
 //   bool isHit = false;
+
+//   // Banner Ad variable
+//   late BannerAd _bannerAd;
+//   bool isBannerAdLoaded = false;
+
 //   @override
 //   Future<void> onLoad() async {
 //     addAll([
@@ -25,6 +32,49 @@
 //     ]);
 
 //     interval.onTick = () => add(PipeGroup());
+
+//     // Initialize the banner ad
+//     _loadBannerAd();
+//   }
+
+//   // Load the banner ad
+//   void _loadBannerAd() {
+//     _bannerAd = BannerAd(
+//       adUnitId: "ca-app-pub-7730090131564483/6401687661",
+//       size: AdSize.banner,
+//       request: const AdRequest(),
+//       listener: BannerAdListener(
+//         onAdLoaded: (Ad ad) {
+//           setState(() {
+//             isBannerAdLoaded = true;
+//           });
+//         },
+//         // onAdFailedToLoad: (Ad ad, LoadAdError error) {},
+//       ),
+//     );
+
+//     _bannerAd.load();
+//   }
+
+//   @override
+//   void onTap() {
+//     super.onTap();
+//     bird.fly();
+//   }
+
+//   @override
+//   void update(double dt) {
+//     super.update(dt);
+//     interval.update(dt);
+
+//     score.text = 'Score: ${bird.scr}';
+//   }
+
+//   @override
+//   void onRemove() {
+//     super.onRemove();
+//     // Dispose the banner ad when the game is removed
+//     _bannerAd.dispose();
 //   }
 
 //   TextComponent buildScore() {
@@ -42,19 +92,7 @@
 //     );
 //   }
 
-//   @override
-//   void onTap() {
-//     super.onTap();
-//     bird.fly();
-//   }
-
-//   @override
-//   void update(double dt) {
-//     super.update(dt);
-//     interval.update(dt);
-
-//     score.text = 'Score: ${bird.scr}';
-//   }
+//   void setState(Null Function() param0) {}
 // }
 
 import 'package:flame/components.dart';
@@ -63,23 +101,20 @@ import 'package:flame/game.dart';
 import 'package:flappybirds/components/ground.dart';
 import 'package:flappybirds/components/pipe_group.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart'; // Import for Google Ads
 
 import '../components/background.dart';
 import '../components/bird.dart';
+import '../widgets/game_state.dart';
 import 'configuration.dart';
+// Import GameState for managing state
 
 class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
-  FlappyBirdGame();
-
   late Bird bird;
   late TextComponent score;
   Timer interval = Timer(Config.pipeInterval, repeat: true);
   bool isHit = false;
 
-  // Banner Ad variable
-  late BannerAd _bannerAd;
-  bool isBannerAdLoaded = false;
+  get context => null;
 
   @override
   Future<void> onLoad() async {
@@ -91,28 +126,6 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
     ]);
 
     interval.onTick = () => add(PipeGroup());
-
-    // Initialize the banner ad
-    _loadBannerAd();
-  }
-
-  // Load the banner ad
-  void _loadBannerAd() {
-    _bannerAd = BannerAd(
-      adUnitId: "ca-app-pub-7730090131564483/6401687661",
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (Ad ad) {
-          setState(() {
-            isBannerAdLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (Ad ad, LoadAdError error) {},
-      ),
-    );
-
-    _bannerAd.load();
   }
 
   @override
@@ -125,15 +138,14 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
   void update(double dt) {
     super.update(dt);
     interval.update(dt);
-
     score.text = 'Score: ${bird.scr}';
   }
 
   @override
   void onRemove() {
     super.onRemove();
-    // Dispose the banner ad when the game is removed
-    _bannerAd.dispose();
+    // Dispose the banner ad when the game is removed via Provider
+    context.read<GameState>().dispose();
   }
 
   TextComponent buildScore() {
@@ -150,6 +162,4 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
       ),
     );
   }
-
-  void setState(Null Function() param0) {}
 }

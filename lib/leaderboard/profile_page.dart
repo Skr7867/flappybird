@@ -11,9 +11,9 @@ class ProfilePage extends StatefulWidget {
   static const String id = 'profilePage'; // Route identifier
 
   ProfilePage({
-    Key? key,
+    super.key,
     required this.game,
-  }) : super(key: key);
+  });
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
